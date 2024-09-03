@@ -1,5 +1,7 @@
 local Class = require(script.Class)
 local Nocturne = Class.new("Nocturne")
+local SecurityService = require(script.SecurityService)
+local NetworkModule = require(script.NetworkModule)
 
 ---@class Nocturne
 ---@brief Manages core functionalities for the game, including assets, remotes, and security.
@@ -9,7 +11,18 @@ function Nocturne:initialize()
   self.remotes = {}
   self.controllerServiceLoader = ControllerServiceLoader.new()
   self.securityService = SecurityService.new()
+  self.networkModule = NetworkModule.new()
   self.securityService:start()
+
+  -- Connect security checks to player events
+  game.Players.PlayerAdded:Connect(function(player)
+    self.securityService:checkSuspiciousBehavior(player)
+    self.securityService:monitorHealth(player)
+    self.securityService:validateInventory(player)
+    self.securityService:checkPlayerVelocity(player)
+    self.securityService:monitorPlayerState(player)
+    self.securityService:validatePlayerPosition(player)
+  end)
 end
 
 ---@param assetId string The ID of the asset to load.
@@ -39,7 +52,7 @@ end
 function Nocturne:fireRemoteEvent(eventName, ...)
   local remote = self.remotes[eventName]
   if remote then
-    remote:FireServer(...)
+    self.networkModule:fireRemoteEvent(remote, ...)
   else
     warn("Remote event not found: " .. eventName)
   end
@@ -50,7 +63,7 @@ end
 function Nocturne:connectRemoteEvent(eventName, callback)
   local remote = self.remotes[eventName]
   if remote then
-    remote.OnServerEvent:Connect(callback)
+    self.networkModule:onServerEvent(remote, callback)
   else
     warn("Remote event not found: " .. eventName)
   end
