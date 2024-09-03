@@ -14,4 +14,3 @@
  * Client: User interaction and control with Controllers.
  * Replicated: Efficient distribution of Assets and Nocturne source.
 Note: This is an Alpha release intended for prototyping. Expect further development and improvements in future releases.
-Let Nocturne empower your prototype development with enhanced security and flexibility.
