@@ -1,3 +1,4 @@
+local Class = require(script.Class)
 local Nocturne = Class.new("Nocturne")
 
 ---@class Nocturne
