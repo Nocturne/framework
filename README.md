@@ -1,4 +1,3 @@
-8
 # Nocturne Framework
  ~ comprehensive security and data management for Roblox games 
 
