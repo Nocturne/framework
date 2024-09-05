@@ -13,9 +13,9 @@ function PluginManager:loadPlugin(pluginPath)
     if not plugin then
         print("Error loading plugin: " .. err)
         return false
+    
     end
 
-    -- Disable harmful functionalities
     local env = {
         print = print,
         pairs = pairs,
