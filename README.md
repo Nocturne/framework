@@ -1,4 +1,4 @@
-
+8
 # Nocturne Framework
  ~ comprehensive security and data management for Roblox games 
 
@@ -21,8 +21,11 @@ local plugin = {}
 function plugin.run()
 
 end 
+
+return plugin
 ```
-return plugin 
+
+Some Lua functions are disabled in plugins for security reasons. 
 ## Notice
 Note: This is an Alpha release intended for prototyping. 
 
