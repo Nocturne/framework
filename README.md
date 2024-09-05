@@ -13,7 +13,16 @@
  * Server: Core logic and data management with Services.
  * Client: User interaction and control with Controllers.
  * Replicated: Efficient distribution of Assets and Nocturne source.
+## Plugins 
+### Example 
+```Lua
+local plugin = {}
 
+function plugin.run()
+
+end 
+```
+return plugin 
 ## Notice
 Note: This is an Alpha release intended for prototyping. 
 
