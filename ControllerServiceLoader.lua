@@ -1,4 +1,4 @@
-local ControllerServiceLoader = {}
+0ilocal ControllerServiceLoader = {}
 ControllerServiceLoader.__index = ControllerServiceLoader
 
 --- Creates a new ControllerServiceLoader instance.
@@ -35,17 +35,8 @@ function ControllerServiceLoader:_loadModule(table, moduleName)
 
     self.loadingModules[moduleName] = true 
 
-    -- Load the module and remove non-documentation comments
     print("Loading module: " .. moduleName)
-    local moduleCode = require(moduleName)
-    moduleCode = moduleCode:gsub("%-%-[^%[].*", "") 
-    moduleCode = moduleCode:gsub("%-%-%[%[.-%]%]", "") 
-
-    local func, err = load(moduleCode, moduleName)
-    if not func then
-        error("Error loading module: " .. err)
-    end
-    local module = func()
+    local module = require(moduleName)
 
     self.loadingModules[moduleName] = nil 
 
