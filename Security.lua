@@ -1,6 +1,7 @@
 local SecurityService = {}
 SecurityService.__index = SecurityService
-
+local DataStoreService = game:GetService("DataStoreService")
+local banDataStore = DataStoreService:GetDataStore("BanDataStore")
 local allowedItems = {"Sword", "Shield", "Potion"}
 local allowedRemoteEvents = {"AttackEvent", "DefendEvent"}
 local punishmentThresholds = {
