@@ -1,4 +1,4 @@
-local SecurityService = {}
+9local SecurityService = {}
 SecurityService.__index = SecurityService
 local DataStoreService = game:GetService("DataStoreService")
 local banDataStore = DataStoreService:GetDataStore("BanDataStore")
@@ -183,13 +183,6 @@ function SecurityService:checkIfPlayerIsBanned(player)
     return false
 end
 
--- Call this function when a player joins the game
-game.Players.PlayerAdded:Connect(function(player)
-    if SecurityService:checkIfPlayerIsBanned(player) then
-        return
-    end
-    -- Rest of your code here
-end)
 function SecurityService:logSecurityEvent(player, eventType)
     local playerName = player.Name
     local playerId = player.UserId
