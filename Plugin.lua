@@ -9,13 +9,6 @@ function PluginManager.new()
 end
 
 function PluginManager:loadPlugin(pluginPath)
-    local plugin, err = loadfile(pluginPath)
-    if not plugin then
-        print("Error loading plugin: " .. err)
-        return false
-    
-    end
-
     local env = {
         print = print,
         pairs = pairs,
