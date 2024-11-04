@@ -1,0 +1,145 @@
+local Nocturne = {}
+
+local Maid = require(game.ReplicatedStorage.Maid)
+local Signal = require(game.ReplicatedStorage.Signal)
+
+-- Storage for all entities, components, classes, and systems
+Nocturne.entities = {}
+Nocturne.components = {}
+Nocturne.classes = {}
+Nocturne.systems = {}
+
+-- API: Register a new component class with default properties
+function Nocturne.defineComponent(className, defaults)
+    Nocturne.classes[className] = defaults
+end
+
+-- API: Create a new entity with an optional list of components
+function Nocturne.newEntity(components)
+    local entity = setmetatable({}, { __index = Nocturne.Entity })
+    entity.id = #Nocturne.entities + 1
+    entity.components = {}
+    entity.maid = Maid.new()
+    entity.signals = { OnDestroy = Signal.new() }
+
+    -- Initialize with provided components
+    if components then
+        for className, values in pairs(components) do
+            entity:addComponent(className, values)
+        end
+    end
+
+    Nocturne.entities[entity.id] = entity
+    return entity
+end
+
+-- Entity object and API
+Nocturne.Entity = {}
+
+-- Add a component to an entity
+function Nocturne.Entity:addComponent(className, values)
+    local classTemplate = Nocturne.classes[className]
+    if not classTemplate then
+        error("Component class '" .. className .. "' is not defined.")
+    end
+
+    -- Initialize component based on its default template
+    local component = {}
+    for key, default in pairs(classTemplate) do
+        component[key] = values and values[key] or default
+    end
+
+    -- Component lifecycle signals
+    local signals = {
+        OnAdded = Signal.new(),
+        OnUpdate = Signal.new(),
+        OnRemoved = Signal.new()
+    }
+    component.signals = signals
+
+    -- Store the component and trigger the OnAdded event
+    self.components[className] = component
+    Nocturne.components[className] = Nocturne.components[className] or {}
+    Nocturne.components[className][self.id] = component
+
+    signals.OnAdded:Fire(self, component)
+    return component
+end
+
+-- Remove a component from an entity
+function Nocturne.Entity:removeComponent(className)
+    local component = self.components[className]
+    if component then
+        local signals = component.signals
+        signals.OnRemoved:Fire(self, component)
+
+        -- Cleanup and remove component from system
+        signals.OnRemoved:Destroy()
+        signals.OnUpdate:Destroy()
+        signals.OnAdded:Destroy()
+        
+        Nocturne.components[className][self.id] = nil
+        self.components[className] = nil
+    end
+end
+
+-- Retrieve a component from the entity
+function Nocturne.Entity:getComponent(className)
+    return self.components[className]
+end
+
+-- API: Destroy an entity, clean up components, and fire OnDestroy signal
+function Nocturne.Entity:destroy()
+    for className, _ in pairs(self.components) do
+        self:removeComponent(className)
+    end
+
+    self.signals.OnDestroy:Fire()
+    self.maid:DoCleaning()
+    Nocturne.entities[self.id] = nil
+end
+
+-- API: Define and register a system
+function Nocturne.registerSystem(name, className, updateFunc)
+    Nocturne.systems[name] = { className = className, updateFunc = updateFunc }
+end
+
+-- API: Run all registered systems
+function Nocturne.runSystems()
+    for _, system in pairs(Nocturne.systems) do
+        local className, updateFunc = system.className, system.updateFunc
+        for entityId, component in pairs(Nocturne.components[className] or {}) do
+            local entity = Nocturne.entities[entityId]
+            updateFunc(entity, component)
+            if component.signals.OnUpdate then
+                component.signals.OnUpdate:Fire()
+            end
+        end
+    end
+end
+
+-- Helper: Retrieve all entities with a specific component
+function Nocturne.getEntitiesByComponent(className)
+    local entities = {}
+    for entityId, _ in pairs(Nocturne.components[className] or {}) do
+        table.insert(entities, Nocturne.entities[entityId])
+    end
+    return entities
+end
+
+return entities 
+-- Define a new component type for "Position"
+Nocturne.defineComponent("Position", { x = 0, y = 0 })
+
+-- Define a simple movement system
+Nocturne.registerSystem("MoveSystem", "Position", function(entity, component)
+    component.x = component.x + 1  -- Move right
+    print("Entity", entity.id, "new position:", component.x, component.y)
+end)
+
+-- Create an entity with a Position component
+local entity = Nocturne.newEntity({
+    Position = { x = 10, y = 20 }
+})
+
+Nocturne.runAllSyatems()
